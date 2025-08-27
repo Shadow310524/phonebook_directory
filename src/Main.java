@@ -2,8 +2,8 @@ import java.util.*;
 public class Main {
     static Map<String,String> users=new HashMap<>();
     static Map<String,Set<Contacts>> phonebook=new HashMap<>();
-    static Map<String,Contacts> dialedLog=new LinkedHashMap<>();
-    static Map<String,Integer> sortedLog=new HashMap<>();
+    static Map<String,ArrayList<Contacts>> dialedLog=new LinkedHashMap<>();
+    static Map<String,Map<String,Integer>> sortedLog=new HashMap<>();
     public static void main(String[] args) {
         Scanner inp=new Scanner(System.in);
         System.out.println("-------------------Phone Contact Directory---------------------");

@@ -69,29 +69,40 @@ public boolean checkUser(String userName, String password) {
         }
     }
 
-    public void printLogDetails(Map<String,Integer> sortedLog) {
-        List<Map.Entry<String,Integer> sorted_list=new ArrayList<>(sortedLog.entrySet());
-        sorted_list.sort((a,b)->b.getValue().compareTo(a.getValue()));
+    public void printLogDetails(Map<String,Map<String,Integer>> sortedLog) {
+        for(Map.Entry<String,Map<String,Integer>> logs:sortedLog.entrySet()) {
+            String name = logs.getKey();
+            Map<String,Integer> call_log=logs.getValue();
+            List<Map.Entry<String, Integer>> sorted_list = new ArrayList<>(call_log.entrySet());
+            sorted_list.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+            System.out.println("-------------------------------------------");
+            System.out.println(name);
+            System.out.println("-------------------------------------------");
+            for(Map.Entry<String,Integer> list:sorted_list){
+                System.out.println(list.getKey()+"->"+list.getValue());
+            }
+        }
 
     }
 
-    public void dial(String user_name, String name, Map<String, Integer> sortedLog) {
+    public void dial(String user_name, String name, Map<String,Map<String,Integer>> sortedLog) {
         Set<Contacts> s=Main.phonebook.get(user_name);
         for(Contacts c:s){
-            if(c.name.equals(name)){
-                System.out.println("Dialling to "+name);
-                if(!Main.dialedLog.containsKey(c)){
-                    Main.dialedLog.put(user_name,c);
-                }
-                else
-                    Main.dialedLog.put(user_name,c);
-
-                if(!sortedLog.containsKey(name)){
-                    Main.dialedLog.put(user_name,c);
-                }
-                else
-                    Main.dialedLog.put(user_name,c);
+            if(c.name.equals(name)) {
+                System.out.println("Dialling to " + name);
+                if (!Main.dialedLog.containsKey(user_name)) {
+                    Main.dialedLog.put(user_name, new ArrayList<>());
+                    Main.dialedLog.get(user_name).add(c);
+                } else
+                    Main.dialedLog.get(user_name).add(c);
+            }
+            else
+                System.out.println("No Contacts Found");
+            if(!sortedLog.containsKey(user_name))
+                Main.sortedLog.put(user_name,new HashMap<>());
+                Map<String,Integer> userLog=sortedLog.get(user_name);
+                userLog.putIfAbsent(name,1);
+                userLog.put(name,userLog.get(name)+1);
             }
         }
     }
-}

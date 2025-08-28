@@ -1,8 +1,5 @@
 import java.util.*;
 public class Main {
-    static Map<String,String> users=new HashMap<>();
-    static Map<String,Set<Contacts>> phonebook=new HashMap<>();
-    static Map<String,ArrayList<Contacts>> dialedLog=new LinkedHashMap<>();
     static Map<String,Map<String,Integer>> sortedLog=new HashMap<>();
     public static void main(String[] args) {
         Scanner inp=new Scanner(System.in);
@@ -10,10 +7,10 @@ public class Main {
         String current_user="";
         boolean current=false;
         int n;
+        UserService u=new UserService();
         ContactService c = new ContactService();
         while(true){
-//                n=inp.nextInt();
-            while(current==false) {
+            while(!current) {
                 System.out.println("1)Add User");
                 System.out.println("2)Login User");
                 n=inp.nextInt();
@@ -26,14 +23,14 @@ public class Main {
                         user_name = inp.nextLine();
                         System.out.println("Enter Password");
                         password = inp.nextLine();
-                        c.addUser(user_name, password);
+                        u.addUser(user_name, password);
                         break;
                     case 2:
                         System.out.println("Enter UserName");
                         user_name = inp.nextLine();
                         System.out.println("Enter Password");
                         password = inp.nextLine();
-                        if(c.checkUser(user_name, password)) {
+                        if(u.checkUser(user_name, password)) {
                             current_user = user_name;
                             current=true;
                         }
@@ -76,22 +73,26 @@ public class Main {
                         break;
                     case 4:
                         System.out.println("-------------------Printing Contact Details-------------------");
-                        c.printContact(phonebook);
+                        c.printContact(current_user);
                         break;
                     case 5:
                         System.out.println("Which Contact to Dial");
                         name= inp.nextLine();
-                        c.dial(current_user,name,sortedLog);
+                        c.dial(current_user,name);
                         break;
                     case 6:
                         System.out.println("-------------------Printing Call Logs-------------------");
-                        c.printLogDetails(sortedLog);
+                        c.printLogDetails(current_user);
                         break;
                     case 7:
+                        System.out.println("-------------------Printing Call Logs-------------------");
+                        c.print(current_user);
+                        break;
+                    case 8:
                         current=false;
                         System.out.println("Logging Out!!");
                         break;
-                    case 8:
+                    case 9:
                         inp.close();
                         return;
                     default:

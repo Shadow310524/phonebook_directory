@@ -2,107 +2,93 @@ import java.util.*;
 
 public class ContactService {
 
-//    Add Users
-
-    public void addUser(String userName, String password) {
-        Main.users.put(userName,password);
-        System.out.println(userName+" added Successfully!!");
-    }
-
-
-//    Check Users
-public boolean checkUser(String userName, String password) {
-    if(Main.users.get(userName).equals(password)){
-        System.out.println("logged in successfully as "+userName);
-        System.out.println("------------------------------------");
-        return true;
-    }
-    else
-        System.out.println("Invalid Username or password");
-    return false;
-}
-
+    private final ContactDirectory cd = new ContactDirectory();
+    private final UserDirectory ud = new UserDirectory();
+    private final DialledDirectory dd = new DialledDirectory();
+    private final SortedDirectory sd = new SortedDirectory();
 //    Add Contacts
     public void addContact(String user_name, Contacts contact){
-        if(!Main.phonebook.containsKey(user_name)) {
-            Main.phonebook.put(user_name, new HashSet<>());
-            Main.phonebook.get(user_name).add(contact);
+        if(cd.addContact(contact)) {
+            System.out.println(contact.getName()+" Contact added");
         }
         else
-            Main.phonebook.get(user_name).add(contact);
+            System.out.println(contact.getName()+" Contact already exist");
     }
 
 //    Remove
     public void removeContact(String user_name,String name) {
-        Set<Contacts> s=Main.phonebook.get(user_name);
-        for (Contacts c:s){
-            if(c.name.equals(name)) {
-                s.remove(c);
-                System.out.println("Removed Successfully!!");
-            }
-        }
+        Users user=ud.getUser(user_name);
+        if(cd.removeContact(name))
+            System.out.println("Successfully deleted");
+        else
+            System.out.println("Contact Not found");
     }
 
 
 //Print
-    public void printContact(Map<String,Set<Contacts>> phonebook) {
-        for(Map.Entry<String,Set<Contacts>> entry:phonebook.entrySet()){
-            Set<Contacts> temp=entry.getValue();
-            System.out.println(entry.getKey());
-            System.out.println("----------------------");
-            for (Contacts c:temp) {
-                String name = c.getName();
-                long phone_no = c.getPhone_No();
-                System.out.println(name + "->"+phone_no);
-            }
-            System.out.println("----------------------");
+    public void printContact(String user_name) {
+        Users user=ud.getUser(user_name);
+        System.out.println("----------------------");
+        System.out.println("Contacts");
+        System.out.println("----------------------");
+        for(Contacts c:cd.getContacts()){
+            String name = c.getName();
+            long phone_no = c.getPhone_No();
+            System.out.println(name + "->"+phone_no);
         }
+            System.out.println("----------------------");
     }
 
     public void updateContact(String user_name,String name,long phone_no) {
-        Set<Contacts> s=Main.phonebook.get(user_name);
-        for (Contacts c:s){
-            if(c.name.equals(name)) {
-                c.setPhone_no(phone_no);
-                System.out.println("Phone number Updated Successfully!!");
-            }
+        Users user=ud.getUser(user_name);
+        Contacts contact=cd.getContact(name);
+        if(contact!=null) {
+            contact.setPhone_no(phone_no);
+            System.out.println("Phone number updated successfully");
         }
+        else
+            System.out.println("No contact exists");
+
     }
 
-    public void printLogDetails(Map<String,Map<String,Integer>> sortedLog) {
-        for(Map.Entry<String,Map<String,Integer>> logs:sortedLog.entrySet()) {
+    public void printLogDetails(String user_name) {
+        Users user=ud.getUser(user_name);
+        List<Map.Entry<String,Integer>> list=new ArrayList<>(sd.getSorted_log().entrySet());
+        list.sort((a,b)->b.getValue().compareTo(a.getValue()));
+        System.out.println(user_name);
+        for(Map.Entry<String,Integer> logs:list) {
             String name = logs.getKey();
-            Map<String,Integer> call_log=logs.getValue();
-            List<Map.Entry<String, Integer>> sorted_list = new ArrayList<>(call_log.entrySet());
-            sorted_list.sort((a, b) -> b.getValue().compareTo(a.getValue()));
             System.out.println("-------------------------------------------");
-            System.out.println(name);
             System.out.println("-------------------------------------------");
-            for(Map.Entry<String,Integer> list:sorted_list){
-                System.out.println(list.getKey()+"->"+list.getValue());
-            }
-        }
-
-    }
-
-    public void dial(String user_name, String name, Map<String,Map<String,Integer>> sortedLog) {
-        Set<Contacts> s=Main.phonebook.get(user_name);
-        for(Contacts c:s){
-            if(c.name.equals(name)) {
-                System.out.println("Dialling to " + name);
-                if (!Main.dialedLog.containsKey(user_name)) {
-                    Main.dialedLog.put(user_name, new ArrayList<>());
-                    Main.dialedLog.get(user_name).add(c);
-                } else
-                    Main.dialedLog.get(user_name).add(c);
-            }
-            else
-                System.out.println("No Contacts Found");
-            if(!sortedLog.containsKey(user_name))
-                Main.sortedLog.put(user_name,new HashMap<>());
-                Map<String,Integer> userLog=sortedLog.get(user_name);
-                userLog.putIfAbsent(name,1);
-                userLog.put(name,userLog.get(name)+1);
-            }
+//            for(Map.Entry<String,Integer> list:sorted_list){
+            System.out.println(logs.getKey()+"->"+logs.getValue());
+//            }
         }
     }
+
+    public void print(String user_name){
+        Users user=ud.getUser(user_name);
+        List<Contacts> contacts= (List<Contacts>) cd.getContacts();
+            System.out.println("-------------------------------------------");
+            System.out.println(user_name);
+            System.out.println("-------------------------------------------");
+        for(Contacts c:contacts){
+            System.out.println("-------------------------------------------");
+            System.out.println(c.getName()+"->"+c.getPhone_No());
+            System.out.println("-------------------------------------------");
+        }
+    }
+
+    public void dial(String user_name, String name) {
+        Users user=ud.getUser(user_name);
+        Contacts c=cd.getContact(name);
+        if(c!=null){
+            System.out.println("Dialled to "+name);
+            dd.dialContact(c);
+            sd.addCall(name);
+        }
+        else{
+            System.out.println("Dialled to "+name);
+        }
+    }
+}
